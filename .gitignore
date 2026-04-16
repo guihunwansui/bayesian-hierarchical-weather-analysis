@@ -3,4 +3,29 @@ data/*
 
 __pycache__/
 .ipynb_checkpoints/
+<<<<<<< Updated upstream
 *.pyc
+=======
+*.ipynb_checkpoints
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+.venv/
+env/
+venv/
+
+# Temporary
+*.tmp
+*.log
+proj_ref
+>>>>>>> Stashed changes
