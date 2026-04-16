@@ -1,71 +1,42 @@
-# Bayesian Hierarchical Modeling for Weather Station Analysis
+# Bayesian Data Analysis Group Project
 
-[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
-[![PyMC](https://img.shields.io/badge/PyMC-5.0+-orange.svg)](https://www.pymc.io/)
+Course deadline: April 20, 2026
 
-**DATASCI 451 Final Project** | University of Michigan, Winter 2026
+## Shared resources
 
-## Key Findings
+- Google Drive folder: https://drive.google.com/drive/folders/1Zc5bMPBN86I0TlzBhJ7EAhxD07arbK6r
+- Research doc: https://docs.google.com/document/d/1U776ZceTIuf4Az6TOk5HWjLERQAC0j28FfI2qM_y1wU/edit?usp=drivesdk
 
-### Hierarchical Advantage by Data Availability
+## Initial plan
 
-| Observations | Hierarchical | No Pooling | Improvement |
-|--------------|--------------|------------|-------------|
-| **1 month** | 1.78°F | 3.76°F | **+52%** |
-| **2 months** | 2.06°F | 3.39°F | **+39%** |
-| 4 months | 1.83°F | 3.25°F | +44% |
+- Pick one of the candidate topics in the linked Google Doc
+- Confirm the final dataset by April 2
+- Finish data cleaning and a baseline model by April 6
+- Finish the first Bayesian model by April 10
+- Finish a draft of results by April 15
+- Polish slides and final writeup by April 18
 
-**Core insight**: Hierarchical models allow data-poor stations to "borrow strength" from data-rich stations.
+## Proposed structure
 
-![Analysis](plots/25_full_dataset_hierarchical_analysis.png)
-
-## Model
-
-```
-y_ij ~ Normal(α_i + β_j, σ²)
-α_i  ~ Normal(μ_α, τ²)      # Station effects from population
-
-Parameters:
-  μ_α = 27.65°F (population mean)
-  τ   = 4.42°F  (between-station SD)
-  σ   = 2.84°F  (observation noise)
+```text
+data/
+notebooks/
+src/
+reports/
+slides/
 ```
 
-## Data
+## Suggested first tasks
 
-- **Source**: NOAA Global Historical Climatology Network
-- **Region**: Michigan, USA (167 stations)
-- **Period**: January - April 2024
-- **Observations**: 643 monthly records
+1. Choose the final topic.
+2. Create a notebook for exploratory data analysis.
+3. Add the dataset source and data dictionary.
+4. Decide whether to use PyMC or Stan.
 
-## Project Structure
+## Current sprint
 
-```
-├── data/                    # Weather data and MCMC traces
-├── plots/                   # 16 visualizations
-├── *.ipynb                  # Jupyter notebooks (EDA, modeling, applications)
-├── *.py                     # Analysis scripts
-└── ANALYSIS_REPORT.md       # Full report with all figures
-```
-
-## Quick Start
-
-```bash
-pip install pymc arviz pandas matplotlib seaborn
-
-# Run models
-python run_models_v2.py
-
-# Analyze results  
-python analyze_results_v2.py
-```
-
-## Report
-
-See [ANALYSIS_REPORT.md](ANALYSIS_REPORT.md) for the complete analysis with all figures.
-
-## Technologies
-
-- **Bayesian Inference**: PyMC 5, ArviZ
-- **Data Analysis**: Pandas, NumPy
-- **Visualization**: Matplotlib, Seaborn
+- April 16: lock the topic, dataset, and modeling plan.
+- April 17: finish the first Bayesian model plus one comparison model.
+- April 18: complete figures, posterior checks, and the main draft.
+- April 19: final proofreading, slide polish, and rehearsal.
+- April 20: submit.
