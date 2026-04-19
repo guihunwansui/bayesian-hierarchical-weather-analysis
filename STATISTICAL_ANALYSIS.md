@@ -1,4 +1,4 @@
-# Bayesian Hierarchical Models: Statistical Analysis Report
+# Bayesian Hierarchical Models: Statistical Analysis
 
 **DATASCI 451 Final Project**  
 University of Michigan, Winter 2026
@@ -8,39 +8,31 @@ University of Michigan, Winter 2026
 ## 1. Data Overview
 
 ### 1.1 Data Source
-- **Source**: NOAA Global Historical Climatology Network (GHCN-Daily)
+- **Source**: NOAA Global Historical Climatology Network
 - **Region**: Michigan, USA
 - **Period**: January - April 2024
-- **Variable**: Mean daily temperature (TAVG)
 
 ### 1.2 Dataset Summary
 
 | Metric | Monthly Data | Daily Data |
 |--------|--------------|------------|
 | Total Observations | 643 | 14,569 |
-| Stations | 167 | 167 |
-| Observations per Station | 1-4 months | 29-190 days |
-| Data Availability Ratio | 4x | 6.6x |
+| Stations | 168 | 167 |
+| Obs per Station | 1-4 months | 29-190 days |
 
-### 1.3 Data Availability Distribution (Monthly)
+### 1.3 Data Availability Distribution
 
-| Coverage | Stations | Percentage |
-|----------|----------|------------|
-| 4 months (complete) | 150 | 90% |
-| 3 months | 6 | 4% |
-| 1-2 months (sparse) | 10 | 6% |
-
-![Data Coverage](plots/02_station_coverage_distribution.png)
-
-This natural variation in data availability is crucial for demonstrating hierarchical model advantages.
+| Months | Stations | Percentage |
+|--------|----------|------------|
+| 4 (complete) | 152 | 90% |
+| 3 | 6 | 4% |
+| 1-2 (sparse) | 10 | 6% |
 
 ---
 
 ## 2. Model Specification
 
 ### 2.1 Statistical Model
-
-For observation $y_{ij}$ at station $i$ in month $j$:
 
 $$y_{ij} \sim N(\alpha_i + \beta_j, \sigma^2)$$
 
@@ -51,219 +43,147 @@ where:
 
 ### 2.2 Three Modeling Approaches
 
-| Model | Station Effect $\alpha_i$ | Information Sharing |
-|-------|---------------------------|---------------------|
-| **Complete Pooling** | $\alpha_i = \mu$ (single value) | All stations identical |
-| **No Pooling** | $\alpha_i \sim N(25, 20^2)$ independent | No sharing |
+| Model | Station Effect | Information Sharing |
+|-------|----------------|---------------------|
+| **Complete Pooling** | $\alpha_i = \mu$ | All stations identical |
+| **No Pooling** | $\alpha_i$ independent | No sharing |
 | **Hierarchical** | $\alpha_i \sim N(\mu_\alpha, \tau^2)$ | Partial pooling |
 
-### 2.3 Hierarchical Model Priors
+### 2.3 Hierarchical Priors
 
 | Parameter | Prior | Interpretation |
 |-----------|-------|----------------|
-| $\mu_\alpha$ | $N(25, 20^2)$ | Population mean baseline |
+| $\mu_\alpha$ | $N(25, 20^2)$ | Population mean |
 | $\tau$ | HalfCauchy(10) | Between-station SD |
 | $\beta_j$ | $N(0, 15^2)$ | Month effects |
 | $\sigma$ | HalfCauchy(10) | Observation noise |
 
-### 2.4 MCMC Configuration
-
-- **Sampler**: NUTS (No-U-Turn Sampler)
-- **Chains**: 2
-- **Samples**: 2,000 per chain
-- **Tune**: 1,000
-- **Parameterization**: Non-centered (for numerical stability)
-
 ---
 
-## 3. Monthly Data Results
+## 3. Results
 
 ### 3.1 Population Parameters
 
 | Parameter | Estimate | Interpretation |
 |-----------|----------|----------------|
-| $\mu_\alpha$ | 27.65°F | Population mean baseline |
-| $\tau$ | 4.42°F | Between-station SD |
+| $\mu_\alpha$ | 28.53°F | Population mean baseline |
+| $\tau$ | 4.39°F | Between-station SD |
 | $\sigma$ | 2.84°F | Observation noise |
+| $\tau/\sigma$ | **1.55** | Signal-to-noise ratio |
 
 ### 3.2 Month Effects
 
-| Month | Effect $\beta_j$ | Mean Temperature |
-|-------|------------------|------------------|
-| January | -11.2°F | 16.5°F |
-| February | -4.2°F | 23.5°F |
-| March | +6.2°F | 33.9°F |
-| April | +9.7°F | 37.4°F |
+![Month Effects](plots/S03_month_effects.png)
 
-**Seasonal swing**: 20.9°F (January to April)
+| Month | Effect | Temperature |
+|-------|--------|-------------|
+| January | -11.6°F | ~17°F |
+| February | -5.4°F | ~23°F |
+| March | +5.4°F | ~34°F |
+| April | +9.3°F | ~38°F |
 
-![Month Effects](plots/14_month_effects.png)
-
-### 3.3 Shrinkage Effect
-
-![Shrinkage Effect](plots/12_shrinkage_effect.png)
-
-All hierarchical estimates are pulled toward the population mean ($\mu_\alpha = 27.65°F$). This "shrinkage" is stronger for:
-- Stations with fewer observations
-- Stations with extreme no-pooling estimates
-
-### 3.4 Station Effects Comparison
-
-![Forest Plot](plots/13_forest_plot.png)
-
-![Posterior Map](plots/16_michigan_posterior_map.png)
+**Seasonal swing**: ~21°F from January to April
 
 ---
 
-## 4. Hierarchical Model Advantage
+## 4. Shrinkage Analysis
 
-### 4.1 Prediction Error by Data Availability
+### 4.1 What is Shrinkage?
 
-![Full Dataset Analysis](plots/25_full_dataset_hierarchical_analysis.png)
+Hierarchical models "shrink" extreme estimates toward the population mean. This regularization:
+- Reduces overfitting for data-poor groups
+- Trades small bias for large variance reduction
 
-| Observations | Stations | Hierarchical MAE | No Pooling MAE | Improvement |
-|--------------|----------|------------------|----------------|-------------|
-| **1 month** | 3 | **1.78°F** | 3.76°F | **+52%** |
-| **2 months** | 7 | **2.06°F** | 3.39°F | **+39%** |
-| 3 months | 6 | 3.63°F | 5.12°F | +29% |
-| 4 months | 151 | 1.83°F | 3.25°F | +44% |
+### 4.2 Shrinkage Verification
 
-**Key Finding**: Hierarchical models show the largest advantage for sparse-data stations.
+![Shrinkage Effect](plots/S01_shrinkage_effect.png)
 
-### 4.2 Sparse Station Analysis
+**Key findings:**
+- Stations **above** mean: 90/91 (99%) correctly shrink DOWN
+- Stations **below** mean: 77/77 (100%) correctly shrink UP
+- **Overall: 167/168 (99%) shrink toward population mean**
 
-![Sparse Station Prediction](plots/24_real_sparse_station_prediction.png)
+### 4.3 Sparse Station Analysis
 
-Example stations with limited data:
+![Sparse Stations](plots/S02_sparse_stations.png)
 
-| Station | Available Data | Hierarchical $\alpha$ | No Pooling $\alpha$ | Shrinkage |
-|---------|----------------|----------------------|---------------------|-----------|
-| GRAYLING | January only | 24.7°F | 24.2°F | +0.5°F |
-| BENTON HARBOR | January only | 34.2°F | 36.2°F | -2.0°F |
-| IRON MTN KINGSFORD | Jan-Feb | 25.4°F | 25.2°F | +0.2°F |
-
-Sparse stations are pulled toward the population mean (27.7°F), reducing overfitting.
-
-### 4.3 New Station Prediction (Leave-One-Station-Out)
-
-| Model | Can Predict New Station? | Method | Average Error |
-|-------|--------------------------|--------|---------------|
-| **Hierarchical** | Yes | Sample from $N(\mu_\alpha, \tau^2)$ | 6.4°F |
-| No Pooling | No | No data available | - |
-
-This is the fundamental advantage of hierarchical models: **principled prediction for new groups**.
+Stations with only 1-2 observations show clear shrinkage toward the population mean (28°F). The arrows indicate the direction of shrinkage from No Pooling (blue) to Hierarchical (orange) estimates.
 
 ---
 
-## 5. Daily vs Monthly Data Comparison
+## 5. Daily vs Monthly Comparison
 
-### 5.1 Motivation
+### 5.1 The Key Question
 
-Why use monthly aggregates instead of daily data? Daily data provides more observations (14,569 vs 643) and greater variation in data availability.
+Why use monthly aggregates instead of daily observations? Daily data provides 23x more observations.
 
-### 5.2 Key Parameters Comparison
+### 5.2 tau/sigma Ratio Comparison
 
-| Parameter | Monthly Data | Daily Data |
-|-----------|--------------|------------|
-| $\tau$ (between-station SD) | 4.42°F | 3.87°F |
-| $\sigma$ (observation noise) | 2.84°F | 10.75°F |
-| **$\tau/\sigma$ ratio** | **1.56** | **0.36** |
+| Data | tau | sigma | tau/sigma |
+|------|-----|-------|-----------|
+| Monthly | 4.39°F | 2.84°F | **1.55** |
+| Daily | 3.87°F | 10.75°F | **0.36** |
 
-### 5.3 The $\tau/\sigma$ Ratio
+![Monthly vs Daily](plots/S04_monthly_vs_daily.png)
 
-The **$\tau/\sigma$ ratio** determines hierarchical model advantage:
+### 5.3 Why Daily Noise is High
 
-$$\text{Hierarchical Advantage} \propto \frac{\tau}{\sigma} = \frac{\text{between-group signal}}{\text{within-group noise}}$$
+Even within the same station and same month, temperature varies ~10°F day-to-day due to weather systems. This is irreducible weather variability.
 
-![Monthly vs Daily Comparison](daily_analysis/plots/D05_monthly_vs_daily_comparison.png)
-
-### 5.4 Cross-Validation Results
-
-| Data Type | $\tau/\sigma$ | Sparse Station Improvement |
-|-----------|---------------|---------------------------|
-| Monthly | 1.56 | **+52%** |
-| Daily | 0.36 | +0.2% |
-
-![Daily Cross-Validation](daily_analysis/plots/D04_cross_validation.png)
-
-### 5.5 Variance Decomposition (Daily Data)
-
-Where does the high daily noise ($\sigma = 10.75°F$) come from?
-
-| Source | Standard Deviation |
-|--------|-------------------|
-| **Day-to-day weather** (same station, same month) | **10.0°F** |
-| Seasonal effect (between months) | 9.3°F |
+| Source | SD |
+|--------|-----|
+| Day-to-day weather | 10.0°F |
+| Seasonal variation | 9.3°F |
 | Station differences | 4.5°F |
 
-Even within the same station and same month, temperature varies ~10°F day-to-day due to weather systems (cold fronts, warm fronts). This is irreducible weather variability.
-
-### 5.6 The Aggregation Insight
+### 5.4 The Aggregation Insight
 
 **Monthly averaging reduces noise ($\sigma$) without reducing station signal ($\tau$).**
 
-| Data | Mechanism | Result |
-|------|-----------|--------|
-| Daily | Weather noise dominates | Low $\tau/\sigma$ = weak hierarchical advantage |
-| Monthly | Weather noise averages out | High $\tau/\sigma$ = strong hierarchical advantage |
+- Daily: Weather noise dominates → low tau/sigma → weak hierarchical advantage
+- Monthly: Noise averages out → high tau/sigma → strong hierarchical advantage
 
-> **Key Insight**: More data $\neq$ more hierarchical advantage. Better signal-to-noise ratio = more hierarchical advantage.
+> **Key Insight**: More data ≠ more hierarchical advantage. Better signal-to-noise ratio = more hierarchical advantage.
 
 ---
 
-## 6. Summary of Findings
+## 6. Summary
 
-### 6.1 Main Results
+### 6.1 Main Findings
 
 | Finding | Evidence |
 |---------|----------|
-| Hierarchical models excel with sparse data | +52% improvement for 1-obs stations |
-| $\tau/\sigma$ ratio determines advantage | Monthly (1.56) >> Daily (0.36) |
-| Shrinkage reduces overfitting | Extreme estimates pulled to population mean |
-| New group prediction is possible | Uses learned population distribution |
+| Shrinkage works correctly | 99% of stations shrink toward mean |
+| tau/sigma determines advantage | Monthly (1.55) >> Daily (0.36) |
+| Aggregation improves SNR | sigma drops from 10.75 to 2.84°F |
 
 ### 6.2 When to Use Hierarchical Models
 
 | Scenario | Recommendation |
 |----------|----------------|
 | Varying data per group | Hierarchical |
-| Need to predict new groups | Hierarchical |
-| Need uncertainty quantification | Hierarchical |
-| High within-group noise | Consider data aggregation first |
-| All groups have sufficient data | Similar to No Pooling |
+| Need new group prediction | Hierarchical |
+| High within-group noise | Consider aggregation first |
+| Groups are extreme outliers | Shrinkage may hurt |
 
 ### 6.3 Key Takeaways
 
-1. **Partial pooling** allows data-poor groups to "borrow strength" from data-rich groups through the population distribution.
+1. **Partial pooling** allows data-poor groups to "borrow strength" from the population distribution.
 
-2. **The $\tau/\sigma$ ratio** is the key determinant of hierarchical model advantage, not the amount of data.
+2. **The tau/sigma ratio** determines hierarchical model advantage.
 
-3. **Data aggregation** can improve hierarchical model performance by reducing within-group noise while preserving between-group signal.
+3. **Data aggregation** can improve hierarchical performance by reducing noise while preserving the group-level signal.
 
 ---
 
-## Appendix: Figure Index
-
-### Monthly Analysis
+## Appendix: Figures
 
 | Figure | Description |
 |--------|-------------|
-| `plots/02_station_coverage_distribution.png` | Data availability distribution |
-| `plots/12_shrinkage_effect.png` | Shrinkage visualization |
-| `plots/13_forest_plot.png` | Station effects forest plot |
-| `plots/14_month_effects.png` | Seasonal effects |
-| `plots/16_michigan_posterior_map.png` | Geographic posterior map |
-| `plots/24_real_sparse_station_prediction.png` | Sparse station analysis |
-| `plots/25_full_dataset_hierarchical_analysis.png` | Full 167-station analysis |
-
-### Daily Analysis
-
-| Figure | Description |
-|--------|-------------|
-| `daily_analysis/plots/D01_data_availability.png` | Daily data availability |
-| `daily_analysis/plots/D02_model_comparison.png` | Daily model comparison |
-| `daily_analysis/plots/D04_cross_validation.png` | Daily cross-validation |
-| `daily_analysis/plots/D05_monthly_vs_daily_comparison.png` | Monthly vs daily comparison |
+| `plots/S01_shrinkage_effect.png` | Shrinkage visualization |
+| `plots/S02_sparse_stations.png` | Sparse station forest plot |
+| `plots/S03_month_effects.png` | Seasonal effects |
+| `plots/S04_monthly_vs_daily.png` | Data granularity comparison |
 
 ---
 
