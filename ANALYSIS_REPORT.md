@@ -170,9 +170,79 @@ This is the fundamental advantage of hierarchical models.
 
 ---
 
-## 6. Practical Applications
+## 6. Supplementary Analysis: Daily vs Monthly Data
 
-### 6.1 Frost Probability Estimation
+### 6.1 Motivation
+
+A natural question arises: **Why use monthly aggregates instead of daily observations?**
+
+Daily data provides:
+- More observations (14,569 vs 643)
+- Natural variation in data availability (29-190 days vs 1-4 months)
+- Finer temporal resolution
+
+We conducted a parallel analysis using daily temperature data to understand how data granularity affects hierarchical model performance.
+
+### 6.2 Daily Data Results
+
+| Metric | Monthly Data | Daily Data |
+|--------|--------------|------------|
+| Total Observations | 643 | 14,569 |
+| Stations | 167 | 167 |
+| Obs per Station | 1-4 | 29-190 |
+| τ (between-station SD) | 4.42°F | 3.87°F |
+| σ (observation noise) | 2.84°F | 10.75°F |
+| **τ/σ ratio** | **1.56** | **0.36** |
+
+### 6.3 Key Finding: The τ/σ Ratio
+
+The **τ/σ ratio** determines hierarchical model advantage:
+
+$$\text{Hierarchical Advantage} \propto \frac{\tau}{\sigma} = \frac{\text{between-group signal}}{\text{within-group noise}}$$
+
+| Data Type | τ/σ | Sparse Station Improvement |
+|-----------|-----|---------------------------|
+| Monthly | 1.56 | **+52%** |
+| Daily | 0.36 | +0.2% |
+
+![Monthly vs Daily Comparison](daily_analysis/plots/D05_monthly_vs_daily_comparison.png)
+
+### 6.4 Why Daily Noise Is So High
+
+Variance decomposition reveals:
+
+| Source | SD |
+|--------|-----|
+| Day-to-day weather (same station, same month) | **10.0°F** |
+| Seasonal effect (between months) | 9.3°F |
+| Station differences | 4.5°F |
+
+Even within the same station and same month, temperature varies ~10°F day-to-day due to weather systems (cold fronts, warm fronts). This is irreducible weather variability, not a modeling artifact.
+
+### 6.5 The Aggregation Insight
+
+**Monthly averaging reduces noise (σ) without reducing station signal (τ).**
+
+- Daily: Individual weather events dominate → low τ/σ → weak hierarchical advantage
+- Monthly: Weather noise averages out → high τ/σ → strong hierarchical advantage
+
+> **Lesson**: More data ≠ more hierarchical advantage. Better signal-to-noise ratio = more hierarchical advantage.
+
+### 6.6 Practical Implications
+
+| Consideration | Recommendation |
+|---------------|----------------|
+| Demonstrating hierarchical models | Use aggregated data |
+| Maximizing τ/σ ratio | Aggregate to reduce within-group noise |
+| When to use daily data | Time series models (AR, GP) that capture temporal correlation |
+
+*Full daily analysis available in `daily_analysis/` directory.*
+
+---
+
+## 7. Practical Applications
+
+### 7.1 Frost Probability Estimation
 
 ![Freezing Probability](plots/18_freezing_probability.png)
 
@@ -184,7 +254,7 @@ Using posterior distributions to compute $P(T < 32°F)$:
 | Traverse City | 98% | 90% | 55% | 28% |
 | Ann Arbor | 95% | 82% | 35% | 12% |
 
-### 6.2 Agricultural Decision Support
+### 7.2 Agricultural Decision Support
 
 ![Planting Decision Map](plots/19_planting_decision_map.png)
 
@@ -193,29 +263,34 @@ Using posterior distributions to compute $P(T < 32°F)$:
 - 20% ≤ P(frost) < 50%: ⚠️ Caution
 - P(frost) ≥ 50%: ❌ Do not plant
 
-### 6.3 Road Maintenance Budget
+### 7.3 Road Maintenance Budget
 
 ![Icy Days Budget](plots/20_icy_days_budget.png)
 
 ---
 
-## 7. Conclusions
+## 8. Conclusions
 
-### 7.1 Main Findings
+### 8.1 Main Findings
 
 1. **Hierarchical models excel with sparse data**
    - 52% error reduction for 1-observation stations
    - 39% error reduction for 2-observation stations
 
-2. **Shrinkage is a double-edged sword**
+2. **The τ/σ ratio determines hierarchical advantage**
+   - High ratio (monthly data: 1.56) → strong shrinkage benefit
+   - Low ratio (daily data: 0.36) → minimal advantage
+   - Data aggregation can improve hierarchical performance
+
+3. **Shrinkage is a double-edged sword**
    - Helps moderate groups (near population mean)
    - May hurt extreme groups (pulled toward wrong mean)
 
-3. **Unique capability: New group prediction**
+4. **Unique capability: New group prediction**
    - Hierarchical: Uses population distribution
    - No Pooling: Cannot predict without data
 
-### 7.2 When to Use Hierarchical Models
+### 8.2 When to Use Hierarchical Models
 
 | Scenario | Recommendation |
 |----------|----------------|
@@ -225,7 +300,7 @@ Using posterior distributions to compute $P(T < 32°F)$:
 | All groups have sufficient data | ≈ Similar to No Pooling |
 | Groups are extreme outliers | ⚠️ Shrinkage may hurt |
 
-### 7.3 Key Takeaway
+### 8.3 Key Takeaway
 
 > **Partial pooling allows data-poor groups to "borrow strength" from data-rich groups through the population distribution. This is the core value of Bayesian hierarchical modeling.**
 
@@ -251,6 +326,16 @@ Using posterior distributions to compute $P(T < 32°F)$:
 | 14 | `20_icy_days_budget.png` | Icy days prediction |
 | 15 | `24_real_sparse_station_prediction.png` | Sparse station test |
 | 16 | `25_full_dataset_hierarchical_analysis.png` | Full dataset analysis |
+
+### Daily Analysis Figures (Supplementary)
+
+| # | Figure | Description |
+|---|--------|-------------|
+| D1 | `daily_analysis/plots/D01_data_availability.png` | Daily data availability |
+| D2 | `daily_analysis/plots/D02_model_comparison.png` | Daily model comparison |
+| D3 | `daily_analysis/plots/D03_forest_plot.png` | Daily forest plot |
+| D4 | `daily_analysis/plots/D04_cross_validation.png` | Daily cross-validation |
+| D5 | `daily_analysis/plots/D05_monthly_vs_daily_comparison.png` | Monthly vs daily comparison |
 
 ---
 
