@@ -244,13 +244,14 @@ Even within the same station and same month, temperature varies ~10°F day-to-da
 
 ![Freezing Probability](plots/18_freezing_probability.png)
 
-Using posterior distributions to compute $P(T < 32°F)$:
+Using posterior distributions to compute $P(T < 32°F)$ from 168-station hierarchical model:
 
 | Station | January | February | March | April |
 |---------|---------|----------|-------|-------|
-| Bergland Dam (UP) | 100% | 99% | 78% | 45% |
-| Traverse City | 98% | 90% | 55% | 28% |
-| Ann Arbor | 95% | 82% | 35% | 12% |
+| Rudyard (UP, cold) | 100% | 100% | 98% | 85% |
+| Petoskey (N MI) | 100% | 100% | 65% | 26% |
+| Bad Axe (Thumb) | 100% | 99% | 21% | 3% |
+| Battle Creek (S MI) | 96% | 46% | 0% | 0% |
 
 ### 7.2 Agricultural Decision Support
 
