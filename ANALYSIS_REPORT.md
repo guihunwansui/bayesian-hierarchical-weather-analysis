@@ -133,16 +133,24 @@ Stations with 1-2 observations show clear shrinkage toward the population mean. 
 
 With our full dataset (168 stations, 1-4 observations each), we can properly evaluate when hierarchical models excel.
 
-### 5.2 Shrinkage by Data Availability
+### 5.2 Model Comparison
 
-| Observations | Stations | Mean Shrinkage |
-|--------------|----------|----------------|
-| **1 month** | 3 | 4.1°F |
-| **2 months** | 7 | 3.3°F |
-| 3 months | 6 | 3.5°F |
-| 4 months | 152 | 3.4°F |
+| Model | Description | Overall MAE |
+|-------|-------------|-------------|
+| Complete Pooling | Single mean for all stations | 4.14°F |
+| No Pooling | Independent station estimates | 1.85°F |
+| **Hierarchical** | Partial pooling with shrinkage | **1.88°F** |
 
-Sparse-data stations show the largest shrinkage toward the population mean, demonstrating the "borrowing strength" mechanism.
+**Hierarchical vs Complete Pooling by Data Availability:**
+
+| Observations | Stations | CP MAE | Hier MAE | Improvement |
+|--------------|----------|--------|----------|-------------|
+| 1 month | 3 | 5.09°F | 1.50°F | **+70%** |
+| 2 months | 7 | 3.66°F | 1.98°F | **+46%** |
+| 3 months | 6 | 5.49°F | 3.73°F | **+32%** |
+| 4 months | 152 | 4.09°F | 1.81°F | **+56%** |
+
+Complete pooling ignores station differences entirely, while hierarchical models learn station-specific effects through partial pooling.
 
 ### 5.3 Shrinkage Verification
 
@@ -198,10 +206,14 @@ The **τ/σ ratio** determines hierarchical model advantage:
 
 $$\text{Hierarchical Advantage} \propto \frac{\tau}{\sigma} = \frac{\text{between-group signal}}{\text{within-group noise}}$$
 
-| Data Type | τ/σ | Sparse Station Improvement |
-|-----------|-----|---------------------------|
-| Monthly | 1.55 | **+52%** |
-| Daily | 0.36 | +0.2% |
+**Hierarchical vs Complete Pooling:**
+
+| Data Type | τ/σ | Improvement vs CP |
+|-----------|-----|-------------------|
+| Monthly | 1.55 | **+55%** overall |
+| Daily | 0.36 | ~+5% overall |
+
+Note: The improvement is measured against Complete Pooling (which ignores station differences). Comparison vs No Pooling is less meaningful for in-sample MAE because No Pooling overfits sparse data.
 
 ![Monthly vs Daily Comparison](plots/S04_monthly_vs_daily.png)
 

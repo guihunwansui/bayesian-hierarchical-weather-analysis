@@ -149,15 +149,26 @@ Even within the same station and same month, temperature varies ~10°F day-to-da
 
 ## 6. Summary
 
-### 6.1 Main Findings
+### 6.1 Model Comparison
+
+| Model | Overall MAE | Description |
+|-------|-------------|-------------|
+| Complete Pooling | 4.14°F | Ignores station differences |
+| No Pooling | 1.85°F | No information sharing |
+| **Hierarchical** | **1.88°F** | Partial pooling (best balance) |
+
+**Hierarchical vs Complete Pooling: +55% improvement**
+
+### 6.2 Main Findings
 
 | Finding | Evidence |
 |---------|----------|
 | Shrinkage works correctly | 99% of stations shrink toward mean |
+| Hierarchical beats CP by 55% | Learns station differences |
 | tau/sigma determines advantage | Monthly (1.55) >> Daily (0.36) |
 | Aggregation improves SNR | sigma drops from 10.75 to 2.84°F |
 
-### 6.2 When to Use Hierarchical Models
+### 6.3 When to Use Hierarchical Models
 
 | Scenario | Recommendation |
 |----------|----------------|
@@ -166,7 +177,7 @@ Even within the same station and same month, temperature varies ~10°F day-to-da
 | High within-group noise | Consider aggregation first |
 | Groups are extreme outliers | Shrinkage may hurt |
 
-### 6.3 Key Takeaways
+### 6.4 Key Takeaways
 
 1. **Partial pooling** allows data-poor groups to "borrow strength" from the population distribution.
 
